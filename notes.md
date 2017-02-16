@@ -758,6 +758,11 @@ In this implementation, if the names don't match, compile error.
 
 HOME TIME.
 
+# Much more not touched on
+
+- basic combinators
+- functors, monads, etc
+
 # Summary
 
 - we have seen...
