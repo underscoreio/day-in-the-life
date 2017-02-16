@@ -39,6 +39,8 @@ What's been realised is that that style is a great fit to scaling in parallel
 and across large data sets.
 If you've heard of map reduce, you'll know what we mean.
 
+(why now... Powerful and modern type systesm...compiler)
+
 # DITL 
 
 Rather than waffle on about this in the abstract,
@@ -623,13 +625,136 @@ We're going to pause for a second a think about what we want to do as a function
 
 We want to take a customer record, take a patch, and merge them together to get an new customer record.
 
+```
+(Customer, Patch) => Customer
+```
 
+How can we represent the patch?
+We want this to be safe, and easy to change.
 
+We could code this up by hand and do something like this in pseudo code:
 
+```
+if (json contains "name") customer.copy(name = json("name"))
+if (json contains "phone") customer.copy(phone = json("phone"))
+```
 
-Next: migrations, http PATCH on a customer
+But that is horrible, error prone, and doesn't do what we want anyway.
+If you change the name, we need to remember that, and then also change your phone number.
 
-TODO
+So, no, we're not doing that.
+What we'll do is create a proper representation for the change:
+
+```
+case class Customer(
+  id    : Long,
+  name  : String,
+  phone : String
+)
+
+case class CustomerPatch(
+  name  : Option[String],
+  phone : Option[String]
+)
+
+def merge(c: Customer, p: Patch): Customer = ???
+```
+
+We're not going to hand-write that merge function.
+I'm going to outline the approach to how we write code to do this.
+
+What we want to be able to do is:
+
+```
+trait Merge[A, P] {
+ def merge(old: A, patch: P): A
+}
+```
+
+You'll probably recognize this now as a type class.
+And if so, you know how we're going to solve the problem.
+
+We start with a basic definition:
+If our customer contained just a string, under what situation can we update it?
+We can do that if the patch contains an optional string.
+
+```
+implicit def optionMerge[A]: Merge[A, Option[A]] = new Merge[A, Option[A]] {
+  def merge(current: A, patch: Option[A]) = patch match {
+    case Some(updated) => updated
+    case None          => current
+  }
+}
+```
+
+How do we get to merge a customer and a customer patch from that.
+In outline, it goes like this:
+
+- What the types of the field in the patch and the customer?
+- Take the first field of the patch and customer
+- As the compile to (implicitly) find a way to merge them.
+- Merge the rest (which recursively takes us back to the start)
+- Combine the updated values back together
+
+The code to do this is getting advanced.
+But the principles at play are the ones we've seen.
+
+By analogy, let's suppose our customer and patch were a list of values:
+
+```
+def merge[C,P](customer: List[C], patch: List[P])(implicit patcher: Merge[C,P]): List[C] =
+  if (customer.isEmpty) Nil
+  else patcher.merge(customer.head, patch.head) :: merge(customer.tail, patch.tail)
+
+// Not complete, much nicer ways... zip, fold, etc
+// Cannot do hetero types etc
+
+merge( List("Bob", "555-123"), List(None, Some("555-555")) )
+merge( List("Bob", "555-123"), List(Some("Robert"), None) )
+```
+
+Combining small things together to make a bigger thing.
+
+The example code includes this as a library called bulletin, 
+from our colleague Dave Gurnell.
+So you can dig around the source and see what it does.
+In fact, it's a bit more fancy than I've shown,
+as it also matches up the names of the fields.
+
+All of this, by the way is at compile time.
+No run-time reflection.
+If the program compiles you will merge the values.
+
+So we can add to our service now:
+
+[build this up]
+
+```
+case req @ PATCH -> Root / "customers" / IntVar(id) =>
+  req.decode[CustomerPatch] { patch =>
+    db.find(id).flatMap {
+      case None           => NotFound()
+      case Some(customer) => 
+        val updated = merge(customer, patch)
+        Ok(db.update(updated))
+    }
+  }
+``
+
+with
+
+```
+val merge = bulletin.AutoMerge[Customer, CustomerPatch]
+
+case class CustomerPatch(
+  name  : Option[String],
+  phone : Option[String]
+)
+```
+
+If the types change, compile error
+In this implementation, if the names don't match, compile error.
+
 
 HOME TIME.
 
