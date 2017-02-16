@@ -211,21 +211,25 @@ Pure function, no side effects here.
 We have separated the description from the behaviour.
 
 This is okay, but ... we probably want to do more here.
-Really, we probably want to _do_ things.
-Like maybe send a nagging email if the subscriber has lapsed.
-Or send an incentive if the customer is expiring soon.
-But we don't want side effects.
+Really, we probably want to do things.
+
+- Like maybe send a nagging email if the subscriber has lapsed.
+- Or send an incentive if the customer is expiring soon.
+- ...
 
 So what do we do? 
+It looks like we're going to be mixing in side effects like sending an email into our code.
+We don't want to do that, we want to isolate those areas from the business logic so we can easily understand it and change it.
+What we do is follow the same pattern again.
 
-It's another ADT!
+Yes, it's another ADT!
 
 ```
 sealed trait Action
+case object NoAction extends Action
 case class EncourageRenewal(c: Customer) extends Action
 case class Expire(c: Customer) extends Action
 case class Nag(c: Customer) extends Action
-case object NoAction extends Action
 
 def transition(customer: Customer, now: DateTime): Action =
   customer.sub match {
@@ -277,6 +281,7 @@ def perform(action: Action): Unit =
     }
 ```
 
+You can see the pattern here.
 We do a bit of thinking to represent the "domain",
 the match the heck out of it.
 
@@ -324,28 +329,187 @@ which happens to be expressed as `::` in Scala.
 
 # Coffee
 
-So that wasn't so bad. First ticket done by now.
-Time for some coffee.
+Sofar in our day in the life, we've done some work on the ticket.
+We've written maybe 10 lines of code, so it's definately time for some coffee.
 
-We saw ADTs
-Separating a representation from doing it
-Helps isolate side effects
-Common pattern used over and over.
-Compile tells you if you've missed a case.
+We can reflect on what we've done so far:
+
+- We saw ADTs
+- Separating a representation from doing it
+- Helps isolate side effects
+- Common pattern used over and over.
+- Compile tells you if you've missed a case.
+
 ...makes change easier
+
 ...super useful in day-to-day development.
 
 
-# Back to the issue tracker, to pick the next ticket off the list.
+# Back to work
+
+The next step is that we want the subscription to appear in our JSON.  Something like this:
+
+[json example of a customer with a sub]
+
+The punchline here is that we don't have to do anything.
+We're using a library which can automatically figure this out for us.
+But the principle it uses for this is a general one.
+So we'll recreate the basics here,
+because it's a pattern that appears again and again.
+
+In particular, we will create tiny building blocks,
+and combine them up into bigger things.
+This is important, because writing small things tends to be relatively easy, which makes development easier,
+
+Let's say we have a value we want to turn into a valid JSON string we can send back to a web browser.
+
+[maybe show json spec sheet from http://json.org/ ]
+
+In the case of an integer, it's pretty easy:
+
+```
+7.toString
+```
+
+In the case of a string, it's similar but we need quote marks:
+
+```
+"'" + "Hello" + "'"
+```
+
+In both these cases we take a value and return a string representation.  That's a function:
+
+```
+ Int => String
+ String => String
+```
+
+and in general:
+
+```
+ T => String
+```
+
+Let's encode that and give it a name:
+
+```
+trait JsonFormat[T] {
+  def format(value: T): String
+}
+```
+
+Here we are syaing, there's this abstract thing called a JsonForamt.
+When you make a json format, you make it for a particular type, and the contract is you're given that type and you get back a string.
+
+Let's create some examples of it:
+
+```
+val intFormat = new JsonFormat[Int] {
+  def format(value: Int): String = value.toString
+}
+
+val stringFormat = new JsonForamt[String] {
+  def format(value: String): String =
+     "'" + value + "'"
+}
+```
+
+and we can write a general purpose formatter:
+
+```
+def outputJson[T](value: T)(formatter: JsonFormat[T]) =
+   formatter.format(value)
+
+outputJson(42)(intFormat)
+```
+
+Now this looks a bit ... pointless. To output json, you give me a value, and a formatter for that value, and we format it.
 
 
-Next JSON: type classes, building blocks
-got a Int, List[A], you can bash them together and do list[int]
-(Comment this is the same pattern for the database)
+We do this, though, because in Scala we can ask the compiler to proove it can format something. We'd say:
 
-TODO
+```
+implicit val intFormat = new JsonFormat[Int] {
+  def format(value: Int): String = value.toString
+}
 
-LUNCH
+def outputJson[T](value: T)(implicit formatter: JsonFormat[T]) =
+   formatter.format(value)
+
+outputJson(42)
+```
+
+Now we have something powerful and safe.
+
+In particular, this means the compile will check that when we ask it to output some Json, someone has created a formater for that thing.
+
+[maybe show it failing on string until we add string implicit]
+
+What makes this powerful, is that we can use this to build bigger structures.
+
+How about we want to convert a list of integers to Json.
+Or a list of strings.
+We don't want to have to write a List[Int] formatter.
+We want to write a list formatter and have it work with anything.
+
+Well, not quite anything.
+Anything that can be turned into JSON.
+
+So we can write:
+
+```
+implicit def listFormat[T](implicit format: JsonFormat[T]) = new JsonFormat[List[T]] {
+  def format(values: List[T]): String = 
+    "[" + values.map(format).mkString(",") + "]"
+}
+
+outputJson(List(1,2,3))
+```
+
+and
+
+```
+outputJson(List( List(1,2), List("a","b") )
+```
+
+So this is increadibly powerfult.
+We have written small functions,
+and combined them to create much larger capabilities.
+
+
+We refer to this as a type class, and there's a simple routine for creating them.
+
+- give the type class a name (JsonFormat) and define a method
+- implement the handful of simple instances (e.g., for Int, String)
+- use the primitives to build bigger strucutres
+
+This is used all over the place.
+
+- You want to parse or format Json
+- Read or write data in a database
+- You want to read Excel and CSV
+- Convert from one format to another
+
+We won't go into it now, but you can imagine how this works for something like a Customer:
+
+```
+case class Customer(
+ id   : Long
+ name : String,
+ sub  : Subscription
+)
+```
+
+We can take the fields in turn and ask if there is a JsonFormatter for them. Probably is for an Long, and a String, and for Subscription we can recurse and do the same thing, and if we have converter for a subscriotion, we can finally convert the whole customer.
+
+# LUNCH
+
+We're good chunk of time into our day.
+Over lunch we'll say we've encoded a problem with an ADT and we've used a type class for convert it to Json.
+And you know what those things mean.
+
+[mention typelevle libraries work together not designed to but use these patterns]
+
 
 # Back to the issue tracker...
 
