@@ -278,7 +278,7 @@ def perform(action: Action): Unit =
     case EncourageRenewal(customer) => sendEmail()
     case Nag(customer) => textThemAtMidnight()
     ...
-    }
+  }
 ```
 
 You can see the pattern here.
@@ -319,7 +319,7 @@ Or how about a List?
 val numbers = List(1,2,3,4,5)
 
 numbers match {
-  case Nil => "No numbers"
+  case Nil        => "No numbers"
   case x :: rest => s"The first number is $x"
 }
 ``
@@ -329,7 +329,7 @@ which happens to be expressed as `::` in Scala.
 
 # Coffee
 
-Sofar in our day in the life, we've done some work on the ticket.
+So far in our day in the life, we've done some work on the ticket.
 We've written maybe 10 lines of code, so it's definately time for some coffee.
 
 We can reflect on what we've done so far:
@@ -355,13 +355,13 @@ The punchline here is that we don't have to do anything.
 We're using a library which can automatically figure this out for us.
 But the principle it uses for this is a general one.
 So we'll recreate the basics here,
-because it's a pattern that appears again and again.
+because it's another pattern that appears again and again.
 
-In particular, we will create tiny building blocks,
+In particular, we create tiny building blocks,
 and combine them up into bigger things.
-This is important, because writing small things tends to be relatively easy, which makes development easier,
+This is important, because writing small things tends to be relatively easy, which makes development easier.
 
-Let's say we have a value we want to turn into a valid JSON string we can send back to a web browser.
+We have a value we want to turn into a valid JSON string we can send back to a web browser.
 
 [maybe show json spec sheet from http://json.org/ ]
 
@@ -398,7 +398,7 @@ trait JsonFormat[T] {
 }
 ```
 
-Here we are syaing, there's this abstract thing called a JsonForamt.
+Here we are saying, there's this abstract thing called a JsonFormat.
 When you make a json format, you make it for a particular type, and the contract is you're given that type and you get back a string.
 
 Let's create some examples of it:
@@ -424,9 +424,7 @@ outputJson(42)(intFormat)
 ```
 
 Now this looks a bit ... pointless. To output json, you give me a value, and a formatter for that value, and we format it.
-
-
-We do this, though, because in Scala we can ask the compiler to proove it can format something. We'd say:
+We do this, because in Scala we can ask the compiler to proove it can format something. We'd say:
 
 ```
 implicit val intFormat = new JsonFormat[Int] {
@@ -440,8 +438,7 @@ outputJson(42)
 ```
 
 Now we have something powerful and safe.
-
-In particular, this means the compile will check that when we ask it to output some Json, someone has created a formater for that thing.
+In particular, this means the compiler will check that when we ask it to output some Json, someone has created a formater for that thing.
 
 [maybe show it failing on string until we add string implicit]
 
@@ -458,9 +455,13 @@ Anything that can be turned into JSON.
 So we can write:
 
 ```
-implicit def listFormat[T](implicit format: JsonFormat[T]) = new JsonFormat[List[T]] {
-  def format(values: List[T]): String = 
-    "[" + values.map(format).mkString(",") + "]"
+implicit def listFormat[T](implicit formatter: JsonFormat[T]) = new JsonFormat[List[T]] {
+  def format(values: List[T]): String = {
+    val formattedValues = for {
+      v <- values
+      } yield formatter.format(v)
+    "[" + formattedValues.mkString(",") + "]"
+  }
 }
 
 outputJson(List(1,2,3))
@@ -472,7 +473,7 @@ and
 outputJson(List( List(1,2), List("a","b") )
 ```
 
-So this is increadibly powerfult.
+So this is incredibly powerful.
 We have written small functions,
 and combined them to create much larger capabilities.
 
@@ -481,7 +482,7 @@ We refer to this as a type class, and there's a simple routine for creating them
 
 - give the type class a name (JsonFormat) and define a method
 - implement the handful of simple instances (e.g., for Int, String)
-- use the primitives to build bigger strucutres
+- use the primitives to build bigger structures
 
 This is used all over the place.
 
@@ -500,7 +501,7 @@ case class Customer(
 )
 ```
 
-We can take the fields in turn and ask if there is a JsonFormatter for them. Probably is for an Long, and a String, and for Subscription we can recurse and do the same thing, and if we have converter for a subscriotion, we can finally convert the whole customer.
+We can take the fields in turn and ask if there is a JsonFormatter for them. Probably is for an Long, and a String, and for Subscription we can recurse and do the same thing, and if we have converter for a subscription, we can finally convert the whole customer.
 
 # LUNCH
 
@@ -508,19 +509,123 @@ We're good chunk of time into our day.
 Over lunch we'll say we've encoded a problem with an ADT and we've used a type class for convert it to Json.
 And you know what those things mean.
 
-[mention typelevle libraries work together not designed to but use these patterns]
+[mention typelevel libraries work together not designed to but use these patterns]
 
+As an example, show doobie:
+
+```
+sql""" select name, phone, id from customer """.query[Customer]
+```
+
+string -> varchar
+long -> 
+....fields in customer
 
 # Back to the issue tracker...
 
+[[ IF IT LOOKS LIKE THERE IS TIME...
 Next: composition in doobie.  Add auditing to a table.
 Every change should be recorded.
+]]
 
-CAKE and more COFFEE
 
-TODO
+# PATCH
 
-# Back to the issue tracker
+Let's pick up another ticket.
+
+> As a customer, I want an easy to use interface to my details, so that I can update some or all of my details.
+
+So this is all about updating a customer record.
+Once upon a time, this would be a form, you'd get all the details, and you'd write the changes to the database.
+We don't tend to do that anymore.
+Instead, we like rich, interactive pages, where when I make a change, that change is saved.
+
+For our API this means we might get the name of the customer to update.
+Or we might get the phone number.
+Or we might get both.
+
+Whatever we get, we need to update it. How are we going to do that?
+
+Let's take a look at the API code base:
+
+```
+class CustomerAPI(db: Database) {
+
+  val service = HttpService {
+
+    case GET -> Root / "customers" =>
+      Ok(db.list.map(_.asJson))
+
+    case GET -> Root / "customers" / IntVar(id) =>
+      db.find(id).flatMap {
+        case Some(customer) => Ok(customer)
+        case None           => NotFound()
+      }
+
+  }
+}
+```
+
+This is a library we're using called http4s.
+We don't need to dwell on much of this, but I'll point out a couple of things.
+
+We're exposing a web service.  You case see we're using the matching (structural recursion) we've seen before.
+In this case, rather than matching on a Subscription or Action, we're matching on an encoding of a request.
+There's been some nice use of the `/` symbol here, to make these routes easy to read.
+But this really is the same pattern matching you've seen already.
+
+It could have been something like:
+
+```
+case (GET, Request("customers")) => ...
+```
+
+...but the http4s team have made it easier to read.
+So if we ask for /customers we get a list of all the customers as a 200 response.
+If we ask for a particular customer ID, we try to look it up in the database.
+That will optionally find a record, and we match on that to produce the appropriate response.
+
+How are we going to take an update on any field.
+We're certainly not going to write an endpoint for each possible change:
+
+```
+case POST -> Root / "customers" / IntVar(id) / "name" => ...
+case POST -> Root / "customers" / IntVar(id) / "phone" => ...
+...
+```
+
+Not only is that teadious and a maintenance pain, it also wouldn't allow us to update both fields at the same time.
+A better fit here would be a JSON Patch.
+
+We're going to receive some updates to some fields. 
+A message like this:
+
+```json
+{
+  "name" : "Robert"
+}
+```
+
+or
+
+
+```json
+{
+  "name" : "Robert",
+  "phone : "+1 555 555"
+}
+```
+
+[not rfc6902 compliant - see diffusion lib, perhaps]
+
+The question is: how to handle that
+We're going to pause for a second a think about what we want to do as a function.
+
+We want to take a customer record, take a patch, and merge them together to get an new customer record.
+
+
+
+
 
 Next: migrations, http PATCH on a customer
 
