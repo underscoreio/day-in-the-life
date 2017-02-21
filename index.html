@@ -578,18 +578,192 @@ h2 {
     ---
     class: center, middle
 
-    ## Lunch
+    ## Used Everywhere
 
     # ADTs
     # Type Classes
 
-
-
-
+    ---
+    class: center, middle
+    > As a .c[customer], I should have an control over my details, so I can .c[update] so or all of them.
 
     ---
-    class: center, middle, hero
+    ```
+    class CustomerAPI(db: Database) {
 
+      val service = HttpService {
+
+        case GET -> Root / "customers" =>
+          Ok(db.list)
+
+        case GET -> Root / "customers" / IntVar(id) =>
+          db.find(id).flatMap {
+            case Some(customer) => Ok(customer)
+            case None           => NotFound()
+          }
+
+      }
+    }
+    ```
+
+    ---
+    # Simplified Patch
+
+    ```json
+    {
+      "name" : "Robert"
+    }
+    ```
+
+    or
+
+    ```json
+    {
+      "name" : "Robert",
+      "phone : "+1 555 555"
+    }
+    ```
+    ---
+    # Simplified Patch
+
+    ```
+    (Customer, Patch) => Customer
+    ```
+
+    ---
+    ```
+    case class Customer(
+      id    : Long,
+      name  : String,
+      phone : String
+    )
+
+    case class CustomerPatch(
+      name  : Option[String],
+      phone : Option[String]
+    )
+
+    def merge(c: Customer, p: Patch): Customer = ???
+    ```
+
+    ---
+    ```
+    trait AutoMerge[A, P] {
+      def merge(old: A, patch: P): A
+    }
+    ```
+
+    ---
+    ```
+    trait AutoMerge[C, P] {
+      def merge(old: C, patch: P): C
+    }
+    ```
+    ```
+    def update[C,P](c: List[C], p: List[P]) =
+      (c, p) match {
+        case (Nil, _  ) => Nil
+        case (c  , Nil) => c
+        case (h :: rest, u :: remaining) =>
+           auto.merge(h, u) :: update(rest, remaining)
+      }
+
+    update( List("Bob", "555-123"), List(Some("Robert"), None) )
+    List("Robert", "555-123")
+    ```
+
+    ---
+    ```
+    trait AutoMerge[C, P] {
+      def merge(old: C, patch: P): C
+    }
+    ```
+    ```
+    def update[C,P](c: List[C], p: List[P])(
+      implicit auto: AutoMerge[C,P]) =
+      (c, p) match {
+        case (Nil, _  ) => Nil
+        case (c  , Nil) => c
+        case (h :: rest, u :: remaining) =>
+           auto.merge(h, u) :: update(rest, remaining)
+      }
+
+    update( List("Bob", "555-123"), List(Some("Robert"), None) )
+    List("Robert", "555-123")
+    ```
+    ---
+    ```
+    trait AutoMerge[C, P] {
+      def merge(old: C, patch: P): C
+    }
+    ```
+    ```
+    def update[C,P](c: List[C], p: List[P])(
+      implicit auto: AutoMerge[C,P]) =
+      (c, p) match {
+        case (Nil, _  ) => Nil
+        case (c  , Nil) => c
+        case (h :: rest, u :: remaining) =>
+           auto.merge(h, u) :: update(rest, remaining)
+      }
+
+    implicit def optionMerge[A] = new AutoMerge[A, Option[A]] {
+      def merge(current: A, patch: Option[A]) = patch match {
+        case Some(updated) => updated
+        case None          => current
+      }
+    }
+
+    update( List("Bob", "555-123"), List(Some("Robert"), None) )
+    List("Robert", "555-123")
+    ```
+
+    ---
+    # Putting it all together...
+
+    ```
+    case req @ PATCH -> Root / "customers" / IntVar(id) =>
+      req.decode[CustomerPatch] { patch =>
+        db.find(id).flatMap {
+          case None           => NotFound()
+          case Some(customer) => 
+            val updated = merge(customer, patch)
+            Ok(db.update(updated))
+        }
+      }
+    ```
+
+    ```
+    val merge = bulletin.AutoMerge[Customer, CustomerPatch]
+
+    case class CustomerPatch(
+      name  : Option[String],
+      phone : Option[String]
+    )
+    ```
+
+    ---
+    class: center, middle
+
+    # ADTs
+    ## Safe, Versitile
+
+    # Type Classes
+    ## Combining Small Building Blocks
+
+    ---
+    class: center, middle
+
+    # Scala
+
+    ## Modern Powerful Compiler
+    ## Functional Programming
+    ## JVM, Scala.js, Scala Native
+
+    ---
+    class: center, middle
+
+    # Help Make Change Easier
 
     ---
     class: center, middle, hero
@@ -601,35 +775,35 @@ h2 {
       [![Underscore Logo](img/white-logo.png)](http://underscore.io/)
     ]
 
-  </textarea>
-    <script src="cache/remark-latest.min.js"></script>
-    <script>
-      var slideshow = remark.create({
-        ratio: '4:3',
-        //ratio: '16:9',
+    </textarea>
+      <script src="cache/remark-latest.min.js"></script>
+      <script>
+        var slideshow = remark.create({
+          ratio: '4:3',
+          //ratio: '16:9',
 
 
-        slideNumberFormat: '%current% / %total%',
-        //slideNumberFormat: '%current% / %total%',
-        // Or you might like the page number bottom right:
-        // slideNumberFormat: '%current%',
+          slideNumberFormat: '%current% / %total%',
+          //slideNumberFormat: '%current% / %total%',
+          // Or you might like the page number bottom right:
+          // slideNumberFormat: '%current%',
 
-        // Default: use ```sql ..``` etc to override
-        highlightLanguage: 'scala',
+          // Default: use ```sql ..``` etc to override
+          highlightLanguage: 'scala',
 
-        // Plausible style for blue background:
-        highlightStyle: 'github',
+          // Plausible style for blue background:
+          highlightStyle: 'github',
 
-        // These also look reasonable:
-        //highlightStyle: 'default',
-        //highlightStyle: 'ascetic',
-        //highlightStyle: 'vs',
+          // These also look reasonable:
+          //highlightStyle: 'default',
+          //highlightStyle: 'ascetic',
+          //highlightStyle: 'vs',
 
-        //Good styles, but don't really work with a blue background:
-        //highlightStyle: 'ir_black',
-        //highlightStyle: 'dark',
+          //Good styles, but don't really work with a blue background:
+          //highlightStyle: 'ir_black',
+          //highlightStyle: 'dark',
 
-        });
-    </script>
-  </body>
-  </html>
+          });
+      </script>
+    </body>
+    </html>

@@ -467,14 +467,6 @@ long ->
 
 # Back to the issue tracker...
 
-[[ IF IT LOOKS LIKE THERE IS TIME...
-Next: composition in doobie.  Add auditing to a table.
-Every change should be recorded.
-]]
-
-
-# PATCH
-
 Let's pick up another ticket.
 
 > As a customer, I want an easy to use interface to my details, so that I can update some or all of my details.
@@ -608,7 +600,7 @@ I'm going to outline the approach to how we write code to do this.
 What we want to be able to do is:
 
 ```
-trait Merge[A, P] {
+trait AutoMerge[A, P] {
  def merge(old: A, patch: P): A
 }
 ```
