@@ -5,7 +5,30 @@
   <link rel="stylesheet" type="text/css" href="cache/animate.min.css">
   <link rel="stylesheet" type="text/css" href="underscore-style.css">
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-  <style type="text/css"></style>
+  <style type="text/css">
+
+.title > h1 {
+  font-size: 220%;
+  padding-bottom: 0.5em;
+}
+
+h2 {
+ color: rgb(146,216,93);
+}
+
+    .c {
+     color: rgb(146,216,93);
+    }
+
+    .credit {
+      color: silver;
+      font-size: 60%
+    }
+
+    .h {
+      visibility: hidden;
+    }
+</style>
 </head>
 <body>
   <textarea id="source">
@@ -16,7 +39,7 @@
     class: center, middle, hero
 
     .title[
-      # Modern Software Development
+      # A Day in the Life of a Functional Programmer
       ## Richard Dallaway, Miles Sabin
 
       [![Underscore Logo](img/white-logo.png)](http://underscore.io/)
@@ -26,85 +49,546 @@
 
     ---
     class: center, middle
-    # Functional Programming with Types
+    # Modern Development 
+    # .c[Functional Programming with Types]
 
     ---
     class: center, middle
-    # Day in the Life of a Functional Programmer
+    # Why now?
+    # .h[Modern compilers have powerful type system]
+    ---
+    class: center, middle
+    # Why now?
+    # .c[Modern compilers have powerful type system]
+    
+    ---
+    class: center, middle
+    ## Functional Programming
+    # Is For Everyone
+    # Makes Change Easier
 
     ---
     class: center, middle
-    # For Eveyone
-    ## Not reserved for maths and logic experts
-    ---
-    class: center, middle
-    # Make Change Easier
-    ---
-    class: center, middle
-    # Let's Write Some Code
-
-    ---
-
-    # Code
-
-    ```
-    case class Wibble(x: Throwable \/ Long) {
-      def answer = 42
-    }
-
-    val f: Int => String =
-      x.toString
-    ```
-
-    ---
-
-    class: animated fadeIn
-
-    <div style="position: absolute; top:0; left: 0; width: 100%; height: 100%; color:red; font-size: 10em; text-align: center">
-     &#x2717;
-    </div>
-    # Code
-
-    ```
-    case class Wibble(x: Throwable \/ Long) {
-      def answer = 42
-    }
-
-    val f: Int => String =
-      x.toString
-    ```
-
-    ---
-
-    # Table Listing Dogs
-
-    | Breed            | Superpower    | Weight (kg) |
-    |:-----------------|:-------------:| -------:|
-    | Springer Spaniel | Wagging       |    24 |
-    | GSP              | Floppy Ears   |    27 |
-    | Jack Russell     | Sleeping      |     8 |
+    # The Morning Standup
 
     ---
     class: center
+    # CRM
 
-    # Pictures &amp; Title
+    <iframe src="img/3t.svg" width="80%"></iframe>
+   
+    ---
 
-    <img src="screengrab.png" width="97%" alt="screen grab">
+    ```bash
+    $ http GET :8080/customers
+    ```
+    ```
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    ```
+    ```json
+    [
+        {
+            "id": 1,
+            "name": "Alice",
+            "phone": "+1 555 1234"
+        },
+        {
+            "id": 2,
+            "name": "Bob",
+            "phone": "+1 555 5678"
+        }
+    ]
+    ```
+    ---
+    class: center, middle
+    > As a .c[customer], I should have a .c[subscription], so I can receive the company magazine.
 
     ---
-    background-image: url(screengrab.png)
+    class: middle
 
-    ???
+    # No subscription
+    # Active subscription
+    # Lapsed subscription
 
-    That's the best I can find for a full-page image.
-    The repeat may just be an issue with remark, [#211](https://github.com/gnab/remark/issues/211), specifically.
+    ---
+    class: middle, center
+
+    # Algebraic Data Types
+    # Structural Recusion
+
+    ## Unfamiliar names for simple powerful ideas
+
+    ---
+    ```
+    sealed trait Subscription
+    ```
+    ---
+    class: animated fadeIn
+    ```
+    sealed trait Subscription
+    case object Never extends Subscription
+    case object Active extends Subscription
+    case object Lapsed extends Subscription
+    ```
+    ---
+    class: animated fadeIn
+    ```
+    sealed trait Subscription
+    case object Never extends Subscription
+    case class Active(expires: Date) extends Subscription
+    case object Lapsed extends Subscription
+    ```
+    ---
+    class: animated fadeIn
+    ```
+    sealed trait Subscription
+    case object Never extends Subscription
+    case class Active(expires: Date) extends Subscription
+    case object Lapsed extends Subscription
+    ```
+    ```
+    case class Customer(
+      name  : String,
+      phone : String,
+      sub   : Subscription
+    )
+    ```
+
+    ---
+    class: animated fadeIn
+    ```
+    sealed trait Subscription
+    case object Never extends Subscription
+    case class Active(expires: Date) extends Subscription
+    case object Lapsed extends Subscription
+    ```
+    ```
+    case class Customer(
+      name  : String,
+      phone : String,
+      sub   : Subscription
+    )
+    ```
+    ```
+    def transition(sub: Subscription, at: Date): Subscription = ? 
+    ```
+
+    ---
+    class: animated fadeIn
+    ```
+    sealed trait Subscription
+    case object Never extends Subscription
+    case class Active(expires: Date) extends Subscription
+    case object Lapsed extends Subscription
+    ```
+    ```
+    case class Customer(
+      name  : String,
+      phone : String,
+      sub   : Subscription
+    )
+    ```
+    ```
+    def transition(sub: Subscription, at: Date): Subscription =
+      sub match {
+        case Lapsed | Never  => sub 
+        case Active(exp)     => ???
+      }
+    ```
+
+    ---
+    class: animated fadeIn
+    ```
+    sealed trait Subscription
+    case object Never extends Subscription
+    case class Active(expires: Date) extends Subscription
+    case object Lapsed extends Subscription
+    ```
+    ```
+    case class Customer(
+      name  : String,
+      phone : String,
+      sub   : Subscription
+    )
+    ```
+    ```
+    def transition(sub: Subscription, at: Date): Subscription =
+      sub match {
+        case Lapsed | Never  => sub 
+        case Active(exp)     => 
+          if (exp > at) Lapsed else sub
+      }
+    ```
+
+    ---
+    class: center, middle
+    > “Marketing just reminded me we give free subscriptions to some customers”
+
+    — Product Owner
+
+    ---
+    class: animated fadeIn
+    ```
+    sealed trait Subscription
+    case object Never extends Subscription
+    case class Active(expires: Date) extends Subscription
+    case object Lapsed extends Subscription
+    ```
+    ---
+    class: animated fadeIn
+    ```
+    sealed trait Subscription
+    case object Never extends Subscription
+    case class Active(expires: Date) extends Subscription
+    case object Lapsed extends Subscription
+    case object Freebie extends Subscription
+    ```
+    ```
+    def transition(sub: Subscription, at: Date): Subscription =
+      sub match {
+        case Lapsed | Never  => sub 
+        case Active(exp)     => 
+          if (exp > at) Lapsed else sub
+      }
+    ```
+    ```bash
+    ERROR: non-exhaustive match
+    ```
+
+    ---
+    class: center, middle
+    # Move side effects out
+
+    ---
+    ```
+    def transition(c: Customer, at: Date): Action = ???
+    ```
+
+    ---
+    class: animated fadeIn
+    ```
+    def transition(c: Customer, at: Date): Action = ???
+    ```
+    ```
+    sealed trait Action
+    case object NoAction extends Action
+    case class EncourageRenewal(c: Customer) extends Action
+    case class Expire(c: Customer) extends Action
+    ...
+    ```
+
+
+    ---
+    class: animated fadeIn
+    ```
+    def transition(c: Customer, at: Date): Action = ???
+    ```
+    ```
+    sealed trait Action
+    case object NoAction extends Action
+    case class EncourageRenewal(c: Customer) extends Action
+    case class Expire(c: Customer) extends Action
+    ...
+    ```
+    ```
+    def perform(a: Action): Unit = ???
+    ```
+
+
+    ---
+    class: middle, center
+    ## ADTs
+
+    # Safe
+    # Versitile
+    # Separate data & behaviour
+
+    ---
+    ```json
+      {
+          "id": 1,
+          "name": "Alice",
+          "phone": "+1 555 1234",
+          "sub": {
+            "type": "expired"
+          }
+      }
+    ```
+
+    ---
+    class: middle, center
+
+    # Type Class
+
+    ## Big things from tiny building blocks
+
+    ---
+    ## Turn Data into JSON text
+
+    ```
+    7.toString
+    7
+    ```
+
+    ---
+    ## Turn Data into JSON text
+    ```
+    7.toString
+    7
+      
+    "\"" + "Hello" + "\""
+    "Hello"
+    ```
+    ---
+    ## Turn Data into JSON text
+    ```
+    7.toString
+    7
+      
+    "\"" + "Hello" + "\""
+    "Hello"
+    ```
+    ```json
+    { greeting: "Hello", count: 7 }
+    ```
+    ---
+    ## Turn Data into JSON text
+    ```
+    7.toString
+    7
+      
+    "\"" + "Hello" + "\""
+    "Hello"
+    ```
+    ```json
+    { greeting: "Hello", count: 7 }
+    ```
+
+    ```
+    Int => String
+    String => String
+    ```
+
+    ---
+    ## Turn Data into JSON text
+    ```
+    7.toString
+    7
+      
+    "\"" + "Hello" + "\""
+    "Hello"
+    ```
+    ```json
+    { greeting: "Hello", count: 7 }
+    ```
+
+    ```
+    Int => String
+    String => String
+    ```
+    
+    ```
+    T => String
+    ```
+
+    ---
+    ```
+    trait JsonFormat[T] {
+      def format(value: T): String
+    }
+    ```
+
+    ---
+    ```
+    trait JsonFormat[T] {
+      def format(value: T): String
+    }
+    ```
+    ```
+    val intFormat = new JsonFormat[Int] {
+      def format(value: Int): String = value.toString
+    }
+
+    val strFormat = new JsonFormat[String] {
+      def format(value: String): String =
+        "\"" + value + "\""
+    }
+    ```
+
+    ---
+    ```
+    trait JsonFormat[T] {
+      def format(value: T): String
+    }
+    ```
+    ```
+    val intFormat = new JsonFormat[Int] {
+      def format(value: Int): String = value.toString
+    }
+
+    val strFormat = new JsonFormat[String] {
+      def format(value: String): String =
+        "\"" + value + "\""
+    }
+    ```
+    ```
+    def outputJson[T](value: T)(jf: JsonFormat[T]) =
+      jf.format(value)
+
+    outputJson(7)(intFormat)
+    // 7
+    ```
+
+    ---
+    class: animated fadeIn
+    ```
+    trait JsonFormat[T] {
+      def format(value: T): String
+    }
+    ```
+    ```
+    implicit val intFormat = new JsonFormat[Int] {
+      def format(value: Int): String = value.toString
+    }
+
+    implicit val strFormat = new JsonFormat[String] {
+      def format(value: String): String =
+        "\"" + value + "\""
+    }
+    ```
+    ```
+    def outputJson[T](value: T)(implicit jf: JsonFormat[T]) =
+      jf.format(value)
+
+    outputJson(7)
+    // 7
+    ```
+
+    ---
+
+    ```
+    [ "Hello", "there" ]
+
+    [ 1, 2, 3, 4 ]
+
+    [ [1,2], [3,4] ]
+
+    ```
+
+    ---
+    ```
+    implicit def listFormat[T] =
+      new JsonFormat[List[T]] {
+        def format(values: List[T]): String = {
+           ???
+        }
+    }
+    ```
+
+    ---
+    ```
+    implicit def listFormat[T] =
+      new JsonFormat[List[T]] {
+        def format(values: List[T]): String = {
+          val formattedValues = {
+            ???
+          }
+          "[" + formattedValues.mkString(",") + "]"
+        }
+    }
+    ```
+
+    ---
+    ```
+    implicit def listFormat[T] =
+      new JsonFormat[List[T]] {
+        def format(values: List[T]): String = {
+          val formattedValues = for {
+            v <- values
+          } yield ???
+          "[" + formattedValues.mkString(",") + "]"
+        }
+    }
+    ```
+
+    ---
+    ```
+    implicit def listFormat[T](implicit jf: JsonFormat[T]) =
+      new JsonFormat[List[T]] {
+        def format(values: List[T]): String = {
+          val formattedValues = for {
+             v <- values
+           } yield jf.format(v)
+         "[" + formattedValues.mkString(",") + "]"
+        }
+    }
+
+    def outputJson[T](value: T)(implicit jf: JsonFormat[T]) =
+      jf.format(value)
+
+    outputJson( List(1,2,3,4) )
+    [1,2,3,4]
+    ```
+    ---
+    ```
+    implicit def listFormat[T](implicit jf: JsonFormat[T]) =
+      new JsonFormat[List[T]] {
+        def format(values: List[T]): String = {
+          val formattedValues = for {
+             v <- values
+           } yield jf.format(v)
+         "[" + formattedValues.mkString(",") + "]"
+        }
+    }
+
+    def outputJson[T](value: T)(implicit jf: JsonFormat[T]) =
+      jf.format(value)
+
+    outputJson( List(1,2,3,4) )
+    [1,2,3,4]
+
+    outputJson( List( List(1,2), List(3,4) ) )
+    [ [1,2], [3,4] ]
+    ```
 
     ---
     class: center, middle
 
-    > “I refuse to answer that question on the grounds that I don't know the answer”
+    ## Type Class
 
-    — Douglas Adams
+    # Small Building Blocks
+    # Combined by the Compiler
+    # Used Everywhere
+
+    ---
+
+    ```
+    case class Customer(
+      name  : String,
+      phone : String,
+      id    : Long
+    )
+    ```
+
+    ```
+    sql" select name, phone, id from customer ".query[Customer]
+    ```
+
+    ---
+    class: center, middle
+
+    ## Lunch
+
+    # ADTs
+    # Type Classes
+
+
+
+
+
+    ---
+    class: center, middle, hero
 
 
     ---
@@ -118,33 +602,34 @@
     ]
 
   </textarea>
-  <script src="cache/remark-latest.min.js"></script>
-  <script>
-    var slideshow = remark.create({
-      ratio: '4:3',
-      //ratio: '16:9',
+    <script src="cache/remark-latest.min.js"></script>
+    <script>
+      var slideshow = remark.create({
+        ratio: '4:3',
+        //ratio: '16:9',
 
 
-      slideNumberFormat: '',
-      // Or you might like the page number bottom right:
-      // slideNumberFormat: '%current%',
+        slideNumberFormat: '%current% / %total%',
+        //slideNumberFormat: '%current% / %total%',
+        // Or you might like the page number bottom right:
+        // slideNumberFormat: '%current%',
 
-      // Default: use ```sql ..``` etc to override
-      highlightLanguage: 'scala',
+        // Default: use ```sql ..``` etc to override
+        highlightLanguage: 'scala',
 
-      // Plausible style for blue background:
-      highlightStyle: 'github',
+        // Plausible style for blue background:
+        highlightStyle: 'github',
 
-      // These also look reasonable:
-      //highlightStyle: 'default',
-      //highlightStyle: 'ascetic',
-      //highlightStyle: 'vs',
+        // These also look reasonable:
+        //highlightStyle: 'default',
+        //highlightStyle: 'ascetic',
+        //highlightStyle: 'vs',
 
-      //Good styles, but don't really work with a blue background:
-      //highlightStyle: 'ir_black',
-      //highlightStyle: 'dark',
+        //Good styles, but don't really work with a blue background:
+        //highlightStyle: 'ir_black',
+        //highlightStyle: 'dark',
 
-      });
-  </script>
-</body>
-</html>
+        });
+    </script>
+  </body>
+  </html>
