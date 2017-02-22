@@ -605,6 +605,33 @@ h2 {
       }
     }
     ```
+    ---
+    class: animated fadeIn
+    ```
+    class CustomerAPI(db: Database) {
+
+      val service = HttpService {
+
+        case GET -> Root / "customers" =>
+          Ok(db.list)
+
+        case GET -> Root / "customers" / IntVar(id) =>
+          db.find(id).flatMap {
+            case Some(customer) => Ok(customer)
+            case None           => NotFound()
+          }
+
+        case PATCH -> Root / "customers" / IntVar(id) =>
+          decode the patch
+            lookup the customer in the database
+              found a record?
+                somehow apply the patch to the record
+                update the database
+              otherwise, 404 the request
+
+      }
+    }
+    ```
 
     ---
     # Simplified Patch
@@ -642,80 +669,107 @@ h2 {
       name  : Option[String],
       phone : Option[String]
     )
-
-    def merge(c: Customer, p: Patch): Customer = ???
     ```
 
     ---
+    class: animated fadeIn
     ```
-    trait AutoMerge[A, P] {
-      def merge(old: A, patch: P): A
+    case class Customer(
+      id    : Long,
+      name  : String,
+      phone : String
+    )
+
+    case class CustomerPatch(
+      name  : Option[String],
+      phone : Option[String]
+    )
+    ```
+    ```
+    trait Merge[Into, From] {
+      def merge(i: Into, f: From): Into
     }
-    ```
 
-    ---
-    ```
-    trait AutoMerge[C, P] {
-      def merge(old: C, patch: P): C
-    }
-    ```
-    ```
-    def update[C,P](c: List[C], p: List[P]) =
-      (c, p) match {
-        case (Nil, _  ) => Nil
-        case (c  , Nil) => c
-        case (h :: rest, u :: remaining) =>
-           auto.merge(h, u) :: update(rest, remaining)
-      }
-
-    update( List("Bob", "555-123"), List(Some("Robert"), None) )
-    List("Robert", "555-123")
-    ```
-
-    ---
-    ```
-    trait AutoMerge[C, P] {
-      def merge(old: C, patch: P): C
-    }
-    ```
-    ```
-    def update[C,P](c: List[C], p: List[P])(
-      implicit auto: AutoMerge[C,P]) =
-      (c, p) match {
-        case (Nil, _  ) => Nil
-        case (c  , Nil) => c
-        case (h :: rest, u :: remaining) =>
-           auto.merge(h, u) :: update(rest, remaining)
-      }
-
-    update( List("Bob", "555-123"), List(Some("Robert"), None) )
-    List("Robert", "555-123")
+    def merge[Into, From](i: Into, f: From) = ???
     ```
     ---
+    class: animated fadeIn
     ```
-    trait AutoMerge[C, P] {
-      def merge(old: C, patch: P): C
-    }
-    ```
-    ```
-    def update[C,P](c: List[C], p: List[P])(
-      implicit auto: AutoMerge[C,P]) =
-      (c, p) match {
-        case (Nil, _  ) => Nil
-        case (c  , Nil) => c
-        case (h :: rest, u :: remaining) =>
-           auto.merge(h, u) :: update(rest, remaining)
-      }
+    case class Customer(
+      id    : Long,
+      name  : String,
+      phone : String
+    )
 
-    implicit def optionMerge[A] = new AutoMerge[A, Option[A]] {
-      def merge(current: A, patch: Option[A]) = patch match {
-        case Some(updated) => updated
-        case None          => current
-      }
+    case class CustomerPatch(
+      name  : Option[String],
+      phone : Option[String]
+    )
+    ```
+    ```
+    trait Merge[Into, From] {
+      def merge(i: Into, f: From): Into
     }
 
-    update( List("Bob", "555-123"), List(Some("Robert"), None) )
-    List("Robert", "555-123")
+    def merge[Into, From](i: Into, f: From)
+      (implicit m: Merge[Into, From]) = m.merge(i, f)
+    ```
+    ---
+    class: animated fadeIn
+    ```
+    case class Customer(
+      id    : Long,
+      name  : String,
+      phone : String
+    )
+
+    case class CustomerPatch(
+      name  : Option[String],
+      phone : Option[String]
+    )
+    ```
+    ```
+    trait Merge[Into, From] {
+      def merge(i: Into, f: From): Into
+    }
+
+    def merge[Into, From](i: Into, f: From)
+      (implicit m: Merge[Into, From]) = m.merge(i, f)
+
+    implicit def customerMerge: Merge[Customer, CustomerPatch] =
+      ???
+    ```
+    ---
+    class: animated fadeIn
+    ```
+    case class Customer(
+      id    : Long,
+      name  : String,
+      phone : String
+    )
+
+    case class CustomerPatch(
+      name  : Option[String],
+      phone : Option[String]
+    )
+    ```
+    ```
+    trait Merge[Into, From] {
+      def merge(i: Into, f: From): Into
+    }
+
+    def merge[Into, From](i: Into, f: From)
+      (implicit m: Merge[Into, From]) = m.merge(i, f)
+
+    implicit def customerMerge: Merge[Customer, CustomerPatch] =
+      ???
+    ```
+    ```
+    merge(
+      Customer(1, "Bob", "555-123"),
+      CustomerPatch(Some("Robert"), None)
+    )
+    Customer(1, "Robert", "555-123")
     ```
 
     ---
