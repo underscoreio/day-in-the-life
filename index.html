@@ -16,18 +16,23 @@ h2 {
  color: rgb(146,216,93);
 }
 
-    .c {
-     color: rgb(146,216,93);
-    }
+.c {
+  color: rgb(146,216,93);
+}
 
-    .credit {
-      color: silver;
-      font-size: 60%
-    }
+.err {
+  color: red;
+}
 
-    .h {
-      visibility: hidden;
-    }
+.credit {
+  color: silver;
+  font-size: 60%
+}
+
+.h {
+  visibility: hidden;
+}
+
 </style>
 </head>
 <body>
@@ -47,25 +52,63 @@ h2 {
 
     ???
 
+    - Modern software development
+    - Via FP eyes and approaches
+
     ---
     class: center, middle
     # Modern Development 
     # .c[Functional Programming with Types]
 
+    ???
+
+    - what? exciting, powerful, liberating
+    - Not product or architecture.
+    - Ideas and techniquies
+    - Every day, regardless of situation
+    - FP: values, maths, pure.
+    - why now?
+
     ---
     class: center, middle
     # Why now?
     # .h[Modern compilers have powerful type system]
+
+    ???
+
+    - Decades
+
     ---
     class: center, middle
     # Why now?
     # .c[Modern compilers have powerful type system]
+   
+    ???
+
+    - Contemporary compilers have powerful typesystems
+    - Do work for us
+    - Let us write small pieces of code
+
+    ---
+    class: center, middle
+
+    # A Day in the Life
+
+    ???
+
+    - Three problems, and solution, lots of codes
+    - I want you to look out for two things
     
     ---
     class: center, middle
     ## Functional Programming
     # Is For Everyone
     # Makes Change Easier
+
+    ???
+
+    - maybe not familiar, practice makes them natural
+    - modular, reasoning
 
     ---
     class: center, middle
@@ -76,6 +119,12 @@ h2 {
     # CRM
 
     <iframe src="img/3t.svg" width="80%"></iframe>
+
+    ???
+
+    - JSON API
+    - Talking to a database
+    - what it stores, how it stores it, irrelevant
    
     ---
 
@@ -100,9 +149,20 @@ h2 {
         }
     ]
     ```
+
+    ???
+
+    - All we have: customers
+    - Simple stuff
+
     ---
     class: center, middle
     > As a .c[customer], I should have a .c[subscription], so I can receive the company magazine.
+    
+
+    ???
+
+    - Add subscription indicator to a customer record
 
     ---
     class: middle
@@ -110,6 +170,12 @@ h2 {
     # No subscription
     # Active subscription
     # Lapsed subscription
+
+    ???
+
+    - Deeper
+    - JSON, database, state machine for moving between states.
+    - How do we do that FP stylee?
 
     ---
     class: middle, center
@@ -119,10 +185,27 @@ h2 {
 
     ## Unfamiliar names for simple powerful ideas
 
+    ???
+
+    - Phrases
+    - Simple flexible way to model a domain
+    - Fuss?
+    - Work through it
+
     ---
     ```
     sealed trait Subscription
     ```
+
+    ???
+
+    - Scala code
+    - Not teaching it
+    - Give you the general idea of approach
+    - Code, send it around
+    
+    - Sealed
+
     ---
     class: animated fadeIn
     ```
@@ -131,6 +214,12 @@ h2 {
     case object Active extends Subscription
     case object Lapsed extends Subscription
     ```
+    
+    ???
+
+    - List them out
+    - Don't have to be uniform
+    
     ---
     class: animated fadeIn
     ```
@@ -171,7 +260,7 @@ h2 {
     )
     ```
     ```
-    def transition(sub: Subscription, at: Date): Subscription = ? 
+    def transition(sub: Subscription, at: Date): Subscription = ???
     ```
 
     ---
@@ -217,9 +306,16 @@ h2 {
       sub match {
         case Lapsed | Never  => sub 
         case Active(exp)     => 
-          if (exp > at) Lapsed else sub
+        if (at > exp) Lapsed else sub
       }
     ```
+
+    ???
+
+    - Everyone OK?
+    - Pure function, doesn't change the world
+    - Separated description, behaviour
+    - What does this give us?
 
     ---
     class: center, middle
@@ -249,12 +345,25 @@ h2 {
       sub match {
         case Lapsed | Never  => sub 
         case Active(exp)     => 
-          if (exp > at) Lapsed else sub
+          if (at > exp) Lapsed else sub
       }
     ```
-    ```bash
-    ERROR: non-exhaustive match
-    ```
+
+    # .err[ERROR: non-exhaustive match]
+
+
+    ???
+
+    - if we don't change the code
+    - really nice: mess with the data type
+    - We can do arbitrary things, not shoe-horn
+
+    - Not special to Scala
+    - Been around, works for people
+   
+    - Exhaustivity one reason
+    - Also: Versitility
+    - Send nagging email or text
 
     ---
     class: center, middle
@@ -265,19 +374,9 @@ h2 {
     def transition(c: Customer, at: Date): Action = ???
     ```
 
-    ---
-    class: animated fadeIn
-    ```
-    def transition(c: Customer, at: Date): Action = ???
-    ```
-    ```
-    sealed trait Action
-    case object NoAction extends Action
-    case class EncourageRenewal(c: Customer) extends Action
-    case class Expire(c: Customer) extends Action
-    ...
-    ```
+    ???
 
+    - What would an action be?
 
     ---
     class: animated fadeIn
@@ -291,10 +390,39 @@ h2 {
     case class Expire(c: Customer) extends Action
     ...
     ```
+
+    ???
+
+    - Skip details
+    - Same as before
+    - match on a customer, produce an action
+
+    ---
+    class: animated fadeIn
     ```
-    def perform(a: Action): Unit = ???
+    def transition(c: Customer, at: Date): Action = ???
+    ```
+    ```
+    sealed trait Action
+    case object NoAction extends Action
+    case class EncourageRenewal(c: Customer) extends Action
+    case class Expire(c: Customer) extends Action
+    ...
+    ```
+    ```
+    def perform(a: Action): Unit = 
+      a match {
+        case NoAction =>
+        case Expire(c) => sendSMS(c)
+        ...etc
+      }
     ```
 
+    ???
+
+    - Does one thing.
+    - Bang out the matches: compile has your back
+    - Isolate the side effect
 
     ---
     class: middle, center
@@ -304,7 +432,15 @@ h2 {
     # Versitile
     # Separate data & behaviour
 
+    ???
+
+    - Written 10 ot 20 lines of code
+    - Reflect
+    - Fundamental bilding blocks
+    - Isolate side effect, make change easier
+
     ---
+    # Output JSON to the Client
     ```json
       {
           "id": 1,
@@ -316,6 +452,12 @@ h2 {
       }
     ```
 
+    ???
+
+    - Progress the ticket
+    - Include our subscription in JSON
+    - Library, illustrate principles
+
     ---
     class: middle, center
 
@@ -323,16 +465,25 @@ h2 {
 
     ## Big things from tiny building blocks
 
+    ???
+
+    - Important because writing small things, not so bad
+
     ---
-    ## Turn Data into JSON text
+    # Turn Data into JSON text
 
     ```
     7.toString
-    7
     ```
 
+    ???
+
+    - Integer in our programming language
+    - Text rep
+    - to send to browser
+
     ---
-    ## Turn Data into JSON text
+    # Turn Data into JSON text
     ```
     7.toString
     7
@@ -341,7 +492,7 @@ h2 {
     "Hello"
     ```
     ---
-    ## Turn Data into JSON text
+    # Turn Data into JSON text
     ```
     7.toString
     7
@@ -352,8 +503,15 @@ h2 {
     ```json
     { greeting: "Hello", count: 7 }
     ```
+
+    ???
+
+    - Allows us to construct valid JSON like this
+    - strings have quote marks
+    - numbers don't
+
     ---
-    ## Turn Data into JSON text
+    # Turn Data into JSON text
     ```
     7.toString
     7
@@ -370,8 +528,13 @@ h2 {
     String => String
     ```
 
+    ???
+
+    - Both cases are functions
+    - General case, call it T
+
     ---
-    ## Turn Data into JSON text
+    # Turn Data into JSON text
     ```
     7.toString
     7
@@ -399,6 +562,13 @@ h2 {
     }
     ```
 
+    ???
+
+    - Let's codify this, and give it a name.
+    - This is abstract
+    - To be a JSON format, you must
+    - Create usable instances
+
     ---
     ```
     trait JsonFormat[T] {
@@ -415,6 +585,10 @@ h2 {
         "\"" + value + "\""
     }
     ```
+
+    ???
+
+    - Fill in the T with an Int
 
     ---
     ```
@@ -439,6 +613,15 @@ h2 {
     outputJson(7)(intFormat)
     // 7
     ```
+
+    ???
+
+    - General purpose formatter
+    - Called it outputJSON
+    - Multiple parameters blocks, see why in a mo
+    - Pointless
+    - Compile fill in some blanks for us, which gets powerful.
+    - Change four things...
 
     ---
     class: animated fadeIn
@@ -465,6 +648,13 @@ h2 {
     // 7
     ```
 
+    ???
+
+    - Permission to fill in
+    - Only with values marked as implicit
+    - Lazy programmer
+    - Powerfull, take and build bigger
+
     ---
 
     ```
@@ -476,6 +666,13 @@ h2 {
 
     ```
 
+    ???
+
+    - List of string, integer, list of list
+    - Don't want to write a JsonFormat for every possible combination
+    - Once and combine them.
+    - How...?
+
     ---
     ```
     implicit def listFormat[T] =
@@ -485,6 +682,11 @@ h2 {
         }
     }
     ```
+
+    ???
+
+    - As we did for Int and String
+    - Fill in the body
 
     ---
     ```
@@ -499,6 +701,10 @@ h2 {
     }
     ```
 
+    ???
+
+    - square braces
+
     ---
     ```
     implicit def listFormat[T] =
@@ -512,7 +718,28 @@ h2 {
     }
     ```
 
+    ???
+
+    - Yield or emit
+    - new list
+    - format each value
+    - how, we don't know what is in our list
+
     ---
+    class: animated fadeIn 
+    ```
+    implicit def listFormat[T](implicit jf: JsonFormat[T]) =
+      new JsonFormat[List[T]] {
+        def format(values: List[T]): String = {
+          val formattedValues = for {
+             v <- values
+           } yield jf.format(v)
+         "[" + formattedValues.mkString(",") + "]"
+        }
+    }
+    ```
+    ---
+    class: animated fadeIn
     ```
     implicit def listFormat[T](implicit jf: JsonFormat[T]) =
       new JsonFormat[List[T]] {
@@ -530,7 +757,15 @@ h2 {
     outputJson( List(1,2,3,4) )
     [1,2,3,4]
     ```
+
+    ???
+
+    - What if the compiler can't? Missing building blocks
+    - Work it
+    - Can the compiler find a formatter for a List?
+
     ---
+    class: animated fadeIn 
     ```
     implicit def listFormat[T](implicit jf: JsonFormat[T]) =
       new JsonFormat[List[T]] {
@@ -552,6 +787,11 @@ h2 {
     [ [1,2], [3,4] ]
     ```
 
+    ???
+
+    - It may be surprising
+    - Recursively call implicit methods as needed
+
     ---
     class: center, middle
 
@@ -560,6 +800,11 @@ h2 {
     # Small Building Blocks
     # Combined by the Compiler
     # Used Everywhere
+
+    ???
+
+    - Increadibly powerful
+    - We call this pattern type class
 
     ---
 
@@ -575,6 +820,48 @@ h2 {
     sql" select name, phone, id from customer ".query[Customer]
     ```
 
+    ???
+
+    - Database uses it too
+    - VARCHAR, Serial PK
+    - But for custom, we provide a type class
+
+    ---
+
+    ```
+    case class Customer(
+      name  : String,
+      phone : String,
+      id    : Long
+    )
+    ```
+
+    ```
+    sql" select name, phone, id from customer ".query[Customer]
+    ```
+    
+    ```
+    implicit val SubscriptionMeta: Meta[Subscription] =
+      Meta[String].nxmap(ch =>
+        ch match {
+          case "A" => Active
+          case "L" => Lapsed
+          case "N" => Never
+        }, sub => 
+        sub match {
+          case Active => "A"
+          case Lapsed => "L"
+          case Never  => "N"
+        })
+    ```
+    ???
+
+    - This is how it looks
+    - We teach the library how we encode and decode a Subscriptin into something it understands
+    - Details don't matter
+    - But this allows the library to know what to do anytime it needs to read or write a subscription to the DB
+    - Versitile FP technique
+
     ---
     class: center, middle
 
@@ -583,9 +870,22 @@ h2 {
     # ADTs
     # Type Classes
 
+    ???
+    
+    - Good chunk of our day, over lunch reflect
+    - Encoded with ADT
+    - Typeclasses with JSON and the database.
+
     ---
     class: center, middle
-    > As a .c[customer], I should have an control over my details, so I can .c[update] so or all of them.
+    > As a .c[customer], I should have an control over my details, so I can .c[update] some or all of them.
+
+    ???
+
+    - Look at one final ticket for today
+    - About updating records
+    - Rich interactive pages
+    - Partial update
 
     ---
     ```
@@ -605,6 +905,12 @@ h2 {
       }
     }
     ```
+
+    ???
+
+    - Look at web layer
+    - Patterns for request
+    
     ---
     class: animated fadeIn
     ```
@@ -633,6 +939,12 @@ h2 {
     }
     ```
 
+    ???
+
+    - What we need to do is accept partial update
+    - JSON PATCH
+    - Docment describing one or more changes
+
     ---
     # Simplified Patch
 
@@ -650,12 +962,26 @@ h2 {
       "phone : "+1 555 555"
     }
     ```
+
+    ???
+
+    - Just name
+    - Just phone
+    - or both
+    - we don't know
+    - safely, no runtime reflection, generate code for this.
+    - all the permutations
+
     ---
     # Simplified Patch
 
     ```
     (Customer, Patch) => Customer
     ```
+
+    ???
+
+    - See this as function
 
     ---
     ```
@@ -670,6 +996,12 @@ h2 {
       phone : Option[String]
     )
     ```
+
+    ???
+
+    - what these look like
+    - accept these fields, optional
+    - and we want to merge them
 
     ---
     class: animated fadeIn
@@ -692,6 +1024,16 @@ h2 {
 
     def merge[Into, From](i: Into, f: From) = ???
     ```
+
+    ???
+
+    - Apply similar patterns
+    - Imagine there's a way to merge values
+    - Here's our interface
+    - We're going to have to create instances
+    - We want to merge into something from something
+    - Fill in...
+
     ---
     class: animated fadeIn
     ```
@@ -714,6 +1056,12 @@ h2 {
     def merge[Into, From](i: Into, f: From)
       (implicit m: Merge[Into, From]) = m.merge(i, f)
     ```
+
+    ???
+
+    - Repeat a technique we've seen: ask the compiler for it
+    - Abstraction lets us break down the problem into small parts
+
     ---
     class: animated fadeIn
     ```
@@ -739,6 +1087,54 @@ h2 {
     implicit def customerMerge: Merge[Customer, CustomerPatch] =
       ???
     ```
+
+    ???
+
+    - what we really want is Merge[C, CP]
+    - We could write that by hand. That's ok
+    - Mechanism for taking class apart
+    - Ask the compiler to find a merge for each field
+    - Not time time to detsil that - advanced.
+    - But building blocks
+    ---
+    class: animated fadeIn
+    ```
+    case class Customer(
+      id    : Long,
+      name  : String,
+      phone : String
+    )
+
+    case class CustomerPatch(
+      name  : Option[String],
+      phone : Option[String]
+    )
+    ```
+    ```
+    trait Merge[Into, From] {
+      def merge(i: Into, f: From): Into
+    }
+
+    def merge[Into, From](i: Into, f: From)
+      (implicit m: Merge[Into, From]) = m.merge(i, f)
+
+    implicit def customerMerge: Merge[Customer, CustomerPatch] =
+      ???
+
+    implicit def optMerge = new Merge[String, Option[String]] {
+      def merge(initial: String, update: Option[String]) = update match {
+       case Some(value) => value
+       case None        => initial
+      }
+    }
+    ```
+
+    ???
+
+    - Comparing options values
+    - Compiler could find that for the name field for example
+    - Basics allow us to merge two records, as shown here
+
     ---
     class: animated fadeIn
     ```
@@ -772,6 +1168,10 @@ h2 {
     Customer(1, "Robert", "555-123")
     ```
 
+    ???
+
+    - patched name
+
     ---
     # Putting it all together...
 
@@ -796,6 +1196,13 @@ h2 {
     )
     ```
 
+    ???
+
+    - Library, colleguae Dave
+    - Fancy things, name matching
+    - job done, no run-time reflection, general, safe, extensible
+    - easy to understand and maintain
+
     ---
     class: center, middle
 
@@ -804,6 +1211,14 @@ h2 {
 
     # Type Classes
     ## Combining Small Building Blocks
+
+    ???
+
+    - Enough
+    - Exciting stuff going on.
+    - More to functional programming
+    - Powerful practical tools
+    - unfamiliar, but with practice become natural
 
     ---
     class: center, middle
@@ -814,10 +1229,25 @@ h2 {
     ## Functional Programming
     ## JVM, Scala.js, Scala Native
 
+    ???
+
+    - Done this with Scala
+    - JVM
+    - Compile to JS for browser and node
+    - and work on native compilation
+    - use our code and tecnhiques in all the places we need to work.
+
     ---
     class: center, middle
 
     # Help Make Change Easier
+
+    ???
+
+    - sharing code across different platorms is another way to make change easier
+    - as well as using ADTs and type classes
+    - I hope thats something you can take away from the talk.
+
 
     ---
     class: center, middle, hero
@@ -833,8 +1263,8 @@ h2 {
       <script src="cache/remark-latest.min.js"></script>
       <script>
         var slideshow = remark.create({
-          ratio: '4:3',
-          //ratio: '16:9',
+    //      ratio: '4:3',
+          ratio: '16:9',
 
 
           slideNumberFormat: '',
