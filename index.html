@@ -41,11 +41,12 @@ h2 {
     layout: true
     class: underscore
     ---
+    ---
     class: center, middle, hero
 
     .title[
       # A Day in the Life of a Functional Programmer
-      ## Richard Dallaway, Miles Sabin
+      ## Richard Dallaway
 
       [![Underscore Logo](img/white-logo.png)](http://underscore.io/)
     ]
@@ -306,7 +307,7 @@ h2 {
       sub match {
         case Lapsed | Never  => sub 
         case Active(exp)     => 
-        if (at > exp) Lapsed else sub
+          if (at > exp) Lapsed else sub
       }
     ```
 
@@ -413,7 +414,7 @@ h2 {
     def perform(a: Action): Unit = 
       a match {
         case NoAction =>
-        case Expire(c) => sendSMS(c)
+        case Expire(c) => sendSMS(c.phone)
         ...etc
       }
     ```
@@ -1227,7 +1228,7 @@ h2 {
 
     ## Modern Powerful Compiler
     ## Functional Programming
-    ## JVM, Scala.js, Scala Native
+    ## JVM, Scala Native, Scala.js
 
     ???
 
