@@ -1,3 +1,8 @@
+# Day in the life...
+
+Presentation on ADTs, type classes.
+
+
 # Remarkjs Template
 
 ## Fonts
