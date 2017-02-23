@@ -36,13 +36,21 @@ h2 {
 .h {
   visibility: hidden;
 }
+
 @page {
   size: 1210px 681px;
   margin: 0;
 }
 
 @media print {
-  .remark-slide-scaler {
+  * {
+     animation : none !important;
+     transition-property: none !important;
+  }
+}
+
+@media print {
+   .remark-slide-scaler {
     width: 100% !important;
     height: 100% !important;
     transform: scale(1) !important;
