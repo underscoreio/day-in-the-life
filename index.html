@@ -66,6 +66,21 @@ h2 {
     layout: true
     class: underscore
     ---
+    ```
+    The text gets this small
+    ```
+
+    ---
+    class: center, middle, hero
+
+    .title[
+      # A Day in the Life of a Functional Programmer
+      ## Richard Dallaway (@d6y)
+
+      [![Underscore Logo](img/white-logo.png)](http://underscore.io/)
+    ]
+
+    ---
     class: center, middle, hero
 
     .title[
@@ -222,7 +237,7 @@ h2 {
     ```
     sealed trait Subscription
     case object Never extends Subscription
-    case class Active(expires: Date) extends Subscription
+    *case class Active(expires: Date) extends Subscription
     case object Lapsed extends Subscription
     ```
     ---
@@ -235,6 +250,7 @@ h2 {
     ```
     ```
     case class Customer(
+      id    : Long,
       name  : String,
       phone : String,
       sub   : Subscription
@@ -251,6 +267,7 @@ h2 {
     ```
     ```
     case class Customer(
+      id    : Long,
       name  : String,
       phone : String,
       sub   : Subscription
@@ -270,6 +287,7 @@ h2 {
     ```
     ```
     case class Customer(
+      id    : Long,
       name  : String,
       phone : String,
       sub   : Subscription
@@ -293,6 +311,7 @@ h2 {
     ```
     ```
     case class Customer(
+      id    : Long,
       name  : String,
       phone : String,
       sub   : Subscription
@@ -335,7 +354,7 @@ h2 {
     case object Never extends Subscription
     case class Active(expires: Date) extends Subscription
     case object Lapsed extends Subscription
-    case object Freebie extends Subscription
+    *case object Freebie extends Subscription
     ```
     ```
     def transition(sub: Subscription, at: Date): Subscription =
@@ -420,6 +439,8 @@ h2 {
     - Does one thing.
     - Bang out the matches: compile has your back
     - Isolate the side effect
+    - INTERPRETER
+    - Coffee
 
     ---
     class: middle, center
@@ -471,6 +492,7 @@ h2 {
 
     ```
     7.toString
+    7
     ```
 
     ???
