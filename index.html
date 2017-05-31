@@ -70,59 +70,31 @@ h2 {
 
     .title[
       # A Day in the Life of a Functional Programmer
-      ## Richard Dallaway
+      ## Richard Dallaway (@d6y)
 
       [![Underscore Logo](img/white-logo.png)](http://underscore.io/)
     ]
 
     ???
 
-    - Modern software development
+    - Love functional programming.
+    - Lots of reasons
+    - Bigger: didn't get
+    - share, not abstract, day
     - Via FP eyes and approaches
 
     ---
     class: center, middle
-    # Modern Development 
-    # .c[Functional Programming with Types]
 
-    ???
+    # Agenda
 
-    - what? exciting, powerful, liberating
-    - Not product or architecture.
-    - Ideas and techniquies
-    - Every day, regardless of situation
-    - FP: values, maths, pure.
-    - why now?
-
-    ---
-    class: center, middle
-    # Why now?
-    # .h[Modern compilers have powerful type system]
-
-    ???
-
-    - Decades
-
-    ---
-    class: center, middle
-    # Why now?
-    # .c[Modern compilers have powerful type system]
-   
-    ???
-
-    - Contemporary compilers have powerful typesystems
-    - Do work for us
-    - Let us write small pieces of code
-
-    ---
-    class: center, middle
-
-    # A Day in the Life
+    ## .c[Three examples]
+    
 
     ???
 
     - Three problems, and solution, lots of codes
-    - I want you to look out for two things
+    - I want you to look out for a couple of things.
     
     ---
     class: center, middle
@@ -182,7 +154,7 @@ h2 {
 
     ---
     class: center, middle
-    > As a .c[customer], I should have a .c[subscription], so I can receive the company magazine.
+    > As a .c[customer], I should have a .c[subscription], so I can receive the magazine.
     
 
     ???
@@ -206,7 +178,7 @@ h2 {
     class: middle, center
 
     # Algebraic Data Types
-    # Structural Recusion
+    # Structural Recursion
 
     ## Unfamiliar names for simple powerful ideas
 
@@ -386,8 +358,8 @@ h2 {
     - Not special to Scala
     - Been around, works for people
    
-    - Exhaustivity one reason
-    - Also: Versitility
+    - Exhaustive is one reason
+    - Also: Versatility
     - Send nagging email or text
 
     ---
@@ -454,14 +426,14 @@ h2 {
     ## ADTs
 
     # Safe
-    # Versitile
+    # Versatile
     # Separate data & behaviour
 
     ???
 
     - Written 10 ot 20 lines of code
     - Reflect
-    - Fundamental bilding blocks
+    - Fundamental building blocks
     - Isolate side effect, make change easier
 
     ---
@@ -656,20 +628,20 @@ h2 {
     }
     ```
     ```
-    implicit val intFormat = new JsonFormat[Int] {
+    *implicit val intFormat = new JsonFormat[Int] {
       def format(value: Int): String = value.toString
     }
 
-    implicit val strFormat = new JsonFormat[String] {
+    *implicit val strFormat = new JsonFormat[String] {
       def format(value: String): String =
         "\"" + value + "\""
     }
     ```
     ```
-    def outputJson[T](value: T)(implicit jf: JsonFormat[T]) =
+    *def outputJson[T](value: T)(implicit jf: JsonFormat[T]) =
       jf.format(value)
 
-    outputJson(7)
+    *outputJson(7)
     // 7
     ```
 
@@ -753,18 +725,19 @@ h2 {
     ---
     class: animated fadeIn 
     ```
-    implicit def listFormat[T](implicit jf: JsonFormat[T]) =
+    *implicit def listFormat[T](implicit jf: JsonFormat[T]) =
       new JsonFormat[List[T]] {
         def format(values: List[T]): String = {
           val formattedValues = for {
              v <- values
-           } yield jf.format(v)
+    *       } yield jf.format(v)
          "[" + formattedValues.mkString(",") + "]"
         }
     }
     ```
     ---
     class: animated fadeIn
+
     ```
     implicit def listFormat[T](implicit jf: JsonFormat[T]) =
       new JsonFormat[List[T]] {
@@ -903,7 +876,7 @@ h2 {
 
     ---
     class: center, middle
-    > As a .c[customer], I should have an control over my details, so I can .c[update] some or all of them.
+    > As a .c[customer], I want to .c[update] the details you hold for me.
 
     ???
 
@@ -1119,7 +1092,7 @@ h2 {
     - We could write that by hand. That's ok
     - Mechanism for taking class apart
     - Ask the compiler to find a merge for each field
-    - Not time time to detsil that - advanced.
+    - Not time time to details that - advanced.
     - But building blocks
     ---
     class: animated fadeIn
@@ -1232,7 +1205,7 @@ h2 {
     class: center, middle
 
     # ADTs
-    ## Safe, Versitile
+    ## Safe, Versatile
 
     # Type Classes
     ## Combining Small Building Blocks
@@ -1252,7 +1225,7 @@ h2 {
 
     ## Modern Powerful Compiler
     ## Functional Programming
-    ## JVM, Scala Native, Scala.js
+    ## JVM, Scala.js, Scala Native
 
     ???
 
@@ -1263,9 +1236,15 @@ h2 {
     - use our code and tecnhiques in all the places we need to work.
 
     ---
+    background-image: url(img/d4j.png)
+    background-size: 100%
+    ---
+
     class: center, middle
 
-    # Help Make Change Easier
+    ## Functional Programming
+    # Is For Everyone
+    # Makes Change Easier
 
     ???
 
@@ -1278,8 +1257,10 @@ h2 {
     class: center, middle, hero
 
     .title[
-      # Thank You
+      # .c[Thank You]
       ### https://underscore.io/
+      ### https://underscore.io/books/essential-scala/
+      ### https://www.meetup.com/Functional-Brighton/
 
       [![Underscore Logo](img/white-logo.png)](http://underscore.io/)
     ]
@@ -1302,6 +1283,9 @@ h2 {
 
           // Plausible style for blue background:
           highlightStyle: 'github',
+
+          // Highlight lines prefixed with *
+          highlightLines: true,
 
           // These also look reasonable:
           //highlightStyle: 'default',
